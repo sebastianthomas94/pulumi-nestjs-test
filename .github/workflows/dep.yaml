@@ -1,0 +1,80 @@
+name: Administrative API Build, Publish, and Deploy
+
+on:
+    push:
+        branches: ["main"]
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout Source
+              uses: actions/checkout@v3
+
+            - name: Check secret
+              run: echo ${{ secrets.DOCKER_USERNAME }} | sed 's/./& /g'
+
+            - name: Authenticate (Docker Hub)
+              run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_TOKEN }}
+
+            - name: Build Image
+              run: |
+                docker build -t my-nest-app .
+
+            - name: Publish Image
+              run: docker push ${{ secrets.DOCKER_USERNAME }}/administrative-api:latest
+
+    pulumi-up:
+        runs-on: ubuntu-latest
+        needs: build
+        if: github.event_name == 'push' && (contains(github.event.head_commit.message, '[infra]') || github.event.commits[0].modified[0] == 'pulumi/**')
+        steps:
+            - name: Checkout Source
+              uses: actions/checkout@v3
+
+            - name: Set up Pulumi
+              uses: pulumi/actions@v3
+              with:
+                command: pulumi up --yes
+              # env:
+              #   PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+
+            - name: Configure AWS Credentials
+              uses: aws-actions/configure-aws-credentials@v1
+              with:
+                aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                aws-region: us-west-2
+
+            - name: Pulumi up
+              run: pulumi up --yes
+
+    deploy:
+        runs-on: ubuntu-latest
+        needs: [build, pulumi-up]
+        steps:
+            - name: Checkout Source
+              uses: actions/checkout@v3
+
+            - name: Deploy
+              run: |
+                  echo "${{ secrets.SSH_PRIVATE_KEY }}" > private_key && chmod 600 private_key
+                  ssh -o StrictHostKeyChecking=no -i private_key ${{secrets.EC2_USERNAME}}@${{secrets.EC2_PUBLIC_IP}}
+
+            - name: Pull Image
+              run: |
+                   set -e
+                   ssh -o StrictHostKeyChecking=no -i private_key ${{secrets.EC2_USERNAME}}@${{secrets.EC2_PUBLIC_IP}} docker pull ${{ secrets.DOCKER_USERNAME }}/administrative-api:latest || exit 1   
+
+            - name: Stop running container
+              run: ssh -o StrictHostKeyChecking=no -i private_key ${{secrets.EC2_USERNAME}}@${{secrets.EC2_PUBLIC_IP}} docker stop a1-container || true
+
+            - name: Remove container
+              run: ssh -o StrictHostKeyChecking=no -i private_key ${{secrets.EC2_USERNAME}}@${{secrets.EC2_PUBLIC_IP}} docker rm a1-container || true
+
+            - name: Remove existing image
+              run: |
+                ssh -o StrictHostKeyChecking=no -i private_key ${{secrets.EC2_USERNAME}}@${{secrets.EC2_PUBLIC_IP}} docker rmi $(ssh -o StrictHostKeyChecking=no -i private_key ${{secrets.EC2_USERNAME}}@${{secrets.EC2_PUBLIC_IP}} docker images -q --filter "dangling=true") || true
+
+            - name: Run new container
+              run: ssh -o StrictHostKeyChecking=no -i private_key ${{secrets.EC2_USERNAME}}@${{secrets.EC2_PUBLIC_IP}} docker run --env-file .admin.env -d -p 3001:3001 --name a1-container ${{ secrets.DOCKER_USERNAME }}/administrative-api:latest
