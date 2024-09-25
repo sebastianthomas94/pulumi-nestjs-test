@@ -1,0 +1,13 @@
+{
+  "name": "sample-test",
+  "description": "testing pulumi",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "dependencies": {
+    "@pulumi/pulumi": "*",
+    "@pulumi/aws": "6.13.3"
+  }
+}

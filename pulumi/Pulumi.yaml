@@ -1,0 +1,10 @@
+name: sample-test
+runtime:
+  name: nodejs
+  options:
+    packagemanager: pnpm
+description: testing pulumi
+config:
+  pulumi:tags:
+    value:
+      pulumi:template: https://www.pulumi.com/ai/api/project/37dea2d2-b731-4db9-a931-a791e604ca73.zip
