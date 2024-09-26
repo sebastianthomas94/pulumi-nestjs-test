@@ -23,7 +23,9 @@ jobs:
                 docker build -t my-nest-app:latest .
 
             - name: Publish Image
-              run: docker push ${{ secrets.DOCKER_USERNAME }}/my-nest-app:latest
+              run: |
+                docker tag my-nest-app:latest ${{ secrets.DOCKER_USERNAME }}/my-nest-app:latest 
+                docker push ${{ secrets.DOCKER_USERNAME }}/my-nest-app:latest
 
     pulumi-up:
         runs-on: ubuntu-latest
