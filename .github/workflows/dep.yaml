@@ -5,27 +5,27 @@ on:
         branches: ["main"]
 
 jobs:
-    # build:
-    #     runs-on: ubuntu-latest
-    #     steps:
-    #         - name: Checkout Source
-    #           uses: actions/checkout@v3
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Checkout Source
+              uses: actions/checkout@v3
 
-    #         - name: Check secret
-    #           run: echo ${{ secrets.DOCKER_USERNAME }} | sed 's/./& /g'
+            - name: Check secret
+              run: echo ${{ secrets.DOCKER_USERNAME }} | sed 's/./& /g'
 
-    #         - name: Authenticate (Docker Hub)
-    #           run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_TOKEN }}
+            - name: Authenticate (Docker Hub)
+              run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_TOKEN }}
 
 
-    #         - name: Build Image
-    #           run: |
-    #             docker build -t my-nest-app:latest .
+            - name: Build Image
+              run: |
+                docker build -t my-nest-app:latest .
 
-    #         - name: Publish Image
-    #           run: |
-    #             docker tag my-nest-app:latest ${{ secrets.DOCKER_USERNAME }}/my-nest-app:latest 
-    #             docker push ${{ secrets.DOCKER_USERNAME }}/my-nest-app:latest
+            - name: Publish Image
+              run: |
+                docker tag my-nest-app:latest ${{ secrets.DOCKER_USERNAME }}/my-nest-app:latest 
+                docker push ${{ secrets.DOCKER_USERNAME }}/my-nest-app:latest
 
     pulumi-up:
         runs-on: ubuntu-latest
