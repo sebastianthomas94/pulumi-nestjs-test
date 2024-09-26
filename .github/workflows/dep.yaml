@@ -50,7 +50,7 @@ jobs:
                 aws-region: us-west-2
 
             - name: Pulumi up
-              run: pulumi up --dev --yes
+              run: pulumi up --stack 'dev' --yes
 
             - name: Capture EC2 Outputs
               id: pulumi_output
