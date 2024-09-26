@@ -55,11 +55,11 @@ jobs:
             # - name: Pulumi up
             #   run: pulumi up --stack 'dev' --yes
 
-            - name: Capture EC2 Outputs
-              id: pulumi_output
-              run: |
-                echo "EC2_PUBLIC_IP=$(pulumi stack output EC2_PUBLIC_IP)" >> $GITHUB_ENV
-                echo "SSH_PRIVATE_KEY=$(pulumi stack output SSH_PRIVATE_KEY)" >> $GITHUB_ENV
+            # - name: Capture EC2 Outputs
+            #   id: pulumi_output
+            #   run: |
+            #     echo "EC2_PUBLIC_IP=$(pulumi stack output EC2_PUBLIC_IP)" >> $GITHUB_ENV
+            #     echo "SSH_PRIVATE_KEY=$(pulumi stack output SSH_PRIVATE_KEY)" >> $GITHUB_ENV
 
     deploy:
         runs-on: ubuntu-latest
