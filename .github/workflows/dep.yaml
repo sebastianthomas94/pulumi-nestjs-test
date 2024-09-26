@@ -20,7 +20,7 @@ jobs:
 
             - name: Install Dependencies in Pulumi Folder
               working-directory: pulumi
-              run: npm i
+              run: npm ci
 
             - name: Build Image
               run: |
