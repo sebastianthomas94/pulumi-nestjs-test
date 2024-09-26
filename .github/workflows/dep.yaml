@@ -20,7 +20,7 @@ jobs:
 
             - name: Build Image
               run: |
-                docker build -t my-nest-app .
+                docker build -t my-nest-app:latest .
 
             - name: Publish Image
               run: docker push ${{ secrets.DOCKER_USERNAME }}/my-nest-app:latest
