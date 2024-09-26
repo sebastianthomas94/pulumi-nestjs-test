@@ -32,6 +32,14 @@ jobs:
         needs: build
         # if: github.event_name == 'push' && (contains(github.event.head_commit.message, '[infra]') || github.event.commits[0].modified[0] == 'pulumi/**')
         steps:
+            - name: Configure AWS Credentials
+              uses: aws-actions/configure-aws-credentials@v1
+              with:
+                aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                aws-region: us-west-2
+
+              
             - name: Checkout Source
               uses: actions/checkout@v3
 
@@ -43,15 +51,9 @@ jobs:
               env:
                 PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 
-            - name: Configure AWS Credentials
-              uses: aws-actions/configure-aws-credentials@v1
-              with:
-                aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-                aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-                aws-region: us-west-2
 
-            - name: Pulumi up
-              run: pulumi up --stack 'dev' --yes
+            # - name: Pulumi up
+            #   run: pulumi up --stack 'dev' --yes
 
             - name: Capture EC2 Outputs
               id: pulumi_output
