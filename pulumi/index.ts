@@ -1,5 +1,6 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
+import * as tls from "@pulumi/tls";
 
 // Create an EC2 security group
 const securityGroup = new aws.ec2.SecurityGroup("securityGroup", {
@@ -12,22 +13,42 @@ const securityGroup = new aws.ec2.SecurityGroup("securityGroup", {
 });
 
 // Fetch the latest Ubuntu AMI
-const ami = aws.ec2.getAmi({
-    mostRecent: true,
-    owners: ["099720109477"], // Canonical
-    filters: [{ name: "name", values: ["ubuntu/images/hvm-ssd/ubuntu-focal-20.04-amd64-server-*"] }],
-});
 
 const instance = new aws.ec2.Instance("instance", {
     instanceType: "t2.micro",
-    ami: ami.then(ami => ami.id),
+    ami: "ami-0e86e20dae9224db8",
     keyName: "adv-pulumi", // real key pair
     securityGroups: [securityGroup.name],
     userData: `#!/bin/bash
     apt-get update -y
     `,
+    tags:{
+        Name: 'pulumi-adv'
+    }
 });
 
+// Allocate an Elastic IP
+const elasticIp = new aws.ec2.Eip("myElasticIP");
+
+// Associate the Elastic IP with the EC2 instance
+const eipAssociation = new aws.ec2.EipAssociation("myEipAssociation", {
+    instanceId: instance.id,
+    allocationId: elasticIp.id,
+});
+
+// Generate a new SSH key pair
+const sshKey = new tls.PrivateKey("ssh-key", {
+    algorithm: "RSA",
+    rsaBits: 4096,
+});
+
+// Export the public key to associate with EC2
+ export const publicKey = sshKey.publicKeyOpenssh;
+
+
 // Export the public IP of the instance
-export const publicIp = instance.publicIp;
 export const publicDns = instance.publicDns;
+export const publicIp = elasticIp.publicIp;
+
+
+//
