@@ -30,5 +30,6 @@
 **/values.dev.yaml
 **/build
 **/dist
+**/pulumi
 LICENSE
 README.md
