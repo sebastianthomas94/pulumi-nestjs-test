@@ -51,9 +51,9 @@ jobs:
               with:
                 command: up
                 stack-name: sebastianthomas94/sample-test/dev
+                work-dir: pulumi
               env:
                 PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
-              work-dir: pulumi
 
 
             - name: Pulumi up
