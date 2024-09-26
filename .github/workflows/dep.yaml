@@ -58,10 +58,10 @@ jobs:
                 PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 
 
-            - name: Pulumi up
-              run: |
-                pulumi stack select dev
-                pulumi up --stack 'sebastianthomas94/sample-test/dev' --yes
+            # - name: Pulumi up
+            #   run: |
+            #     pulumi stack select dev
+            #     pulumi up --stack 'sebastianthomas94/sample-test/dev' --yes
 
             - name: Capture EC2 Outputs
               id: pulumi_output
