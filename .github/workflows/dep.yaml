@@ -47,13 +47,15 @@ jobs:
               uses: pulumi/actions@v3
               with:
                 command: up
-                stack-name: dev
+                stack-name: sample-test / dev
               env:
                 PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 
 
             - name: Pulumi up
-              run: pulumi up --stack 'dev' --yes
+              run: |
+                pulumi stack select dev
+                pulumi up --stack 'sample-test / dev' --yes
 
             - name: Capture EC2 Outputs
               id: pulumi_output
