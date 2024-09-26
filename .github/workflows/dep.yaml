@@ -27,7 +27,7 @@ jobs:
                 docker tag my-nest-app:latest ${{ secrets.DOCKER_USERNAME }}/my-nest-app:latest 
                 docker push ${{ secrets.DOCKER_USERNAME }}/my-nest-app:latest
 
-    pulumi-up:
+    # pulumi-up:
         runs-on: ubuntu-latest
         needs: build
         # if: github.event_name == 'push' && (contains(github.event.head_commit.message, '[infra]') || github.event.commits[0].modified[0] == 'pulumi/**')
