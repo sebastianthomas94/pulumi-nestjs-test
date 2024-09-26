@@ -49,3 +49,6 @@ const sshKey = new tls.PrivateKey("ssh-key", {
 // Export the public IP of the instance
 export const publicDns = instance.publicDns;
 export const publicIp = elasticIp.publicIp;
+
+
+//
