@@ -38,7 +38,8 @@ jobs:
             - name: Set up Pulumi
               uses: pulumi/actions@v3
               with:
-                command: pulumi up --stack 'dev' --yes
+                command: up
+                stack-name: dev
               env:
                 PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
 
