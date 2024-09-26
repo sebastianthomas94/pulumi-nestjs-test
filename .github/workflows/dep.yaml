@@ -45,7 +45,8 @@ jobs:
 
             - name: Change to project directory
               run: cd pulumi
-
+            
+            - run: npm install
             - name: Set up Pulumi
               uses: pulumi/actions@v3
               with:
