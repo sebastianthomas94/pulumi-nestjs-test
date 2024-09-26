@@ -31,10 +31,10 @@ const instance = new aws.ec2.Instance("instance", {
 // const elasticIp = new aws.ec2.Eip("myElasticIP");
 
 // Associate the Elastic IP with the EC2 instance
-const eipAssociation = new aws.ec2.EipAssociation("myEipAssociation", {
-    instanceId: instance.id,
-    // allocationId: elasticIp.id,
-});
+// const eipAssociation = new aws.ec2.EipAssociation("myEipAssociation", {
+//     instanceId: instance.id,
+//     // allocationId: elasticIp.id,
+// });
 
 // Generate a new SSH key pair
 const sshKey = new tls.PrivateKey("ssh-key", {
