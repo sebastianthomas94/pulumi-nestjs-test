@@ -17,6 +17,11 @@ jobs:
             - name: Authenticate (Docker Hub)
               run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_TOKEN }}
 
+              
+            - name: Install Dependencies in Pulumi Folder
+              working-directory: pulumi
+              run: pnpm i
+
             - name: Build Image
               run: |
                 docker build -t my-nest-app .
