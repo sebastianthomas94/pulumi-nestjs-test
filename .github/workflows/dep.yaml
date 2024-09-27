@@ -93,7 +93,6 @@ jobs:
             
             - name: check if output and env set
               run: |
-                cat $GITHUB_OUTPUT
                 cat #GITHUB_ENV
 
     deploy:
@@ -104,7 +103,7 @@ jobs:
               uses: actions/checkout@v3
             - env:
                 EC2_PUBLIC_IP: ${{ needs.pulumi-up.env.EC2_PUBLIC_IP }}
-                SSH_PRIVATE_KEY: ${{ needs.pulumi-up.outputs.SSH_PRIVATE_KEY }}
+                SSH_PRIVATE_KEY: ${{ needs.pulumi-up.env.SSH_PRIVATE_KEY }}
               run: echo "this is the  env=$EC2_PUBLIC_IP $SSH_PRIVATE_KEY"
 
             - name: Deploy
