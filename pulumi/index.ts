@@ -39,7 +39,7 @@ const instance = new aws.ec2.Instance("instance", {
 // Generate a new SSH key pair
 const sshKey = new tls.PrivateKey("ssh-key", {
     algorithm: "RSA",
-    rsaBits: 4096,
+    rsaBits: 2048,
 });
 
 // Export the public key to associate with EC2
