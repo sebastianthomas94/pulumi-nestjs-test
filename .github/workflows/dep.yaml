@@ -112,24 +112,24 @@ jobs:
                   cat $GITHUB_ENV
                   echo "EC2_PUBLIC_IP=${{env.EC2_PUBLIC_IP}}"
                   echo "SSH_PRIVATE_KEY=${{env.SSH_PRIVATE_KEY}}"
-                  echo $SSH_PRIVATE_KEY > private_key && chmod 600 private_key
+                  echo ${{env.SSH_PRIVATE_KEY}} > private_key && chmod 600 private_key
                   cat private_key
-                  ssh -o StrictHostKeyChecking=no -i private_key ${{secrets.EC2_USERNAME}}@$EC2_PUBLIC_IP
+                  ssh -o StrictHostKeyChecking=no -i private_key ${{secrets.EC2_USERNAME}}@${{env.EC2_PUBLIC_IP}}
 
             - name: Pull Image
               run: |
                    set -e
-                   ssh -o StrictHostKeyChecking=no -i private_key ${{secrets.EC2_USERNAME}}@$EC2_PUBLIC_IP docker pull ${{ secrets.DOCKER_USERNAME }}/administrative-api:latest || exit 1   
+                   ssh -o StrictHostKeyChecking=no -i private_key ${{secrets.EC2_USERNAME}}@${{env.EC2_PUBLIC_IP}} docker pull ${{ secrets.DOCKER_USERNAME }}/administrative-api:latest || exit 1   
 
             - name: Stop running container
-              run: ssh -o StrictHostKeyChecking=no -i private_key ${{secrets.EC2_USERNAME}}@$EC2_PUBLIC_IP docker stop a1-container || true
+              run: ssh -o StrictHostKeyChecking=no -i private_key ${{secrets.EC2_USERNAME}}@${{env.EC2_PUBLIC_IP}} docker stop a1-container || true
 
             - name: Remove container
-              run: ssh -o StrictHostKeyChecking=no -i private_key ${{secrets.EC2_USERNAME}}@$EC2_PUBLIC_IP docker rm a1-container || true
+              run: ssh -o StrictHostKeyChecking=no -i private_key ${{secrets.EC2_USERNAME}}@${{env.EC2_PUBLIC_IP}} docker rm a1-container || true
 
             - name: Remove existing image
               run: |
-                ssh -o StrictHostKeyChecking=no -i private_key ${{secrets.EC2_USERNAME}}@$EC2_PUBLIC_IP docker rmi $(ssh -o StrictHostKeyChecking=no -i private_key ${{secrets.EC2_USERNAME}}@$EC2_PUBLIC_IP docker images -q --filter "dangling=true") || true
+                ssh -o StrictHostKeyChecking=no -i private_key ${{secrets.EC2_USERNAME}}@${{env.EC2_PUBLIC_IP}} docker rmi $(ssh -o StrictHostKeyChecking=no -i private_key ${{secrets.EC2_USERNAME}}@${{env.EC2_PUBLIC_IP}} docker images -q --filter "dangling=true") || true
 
             - name: Run new container
-              run: ssh -o StrictHostKeyChecking=no -i private_key ${{secrets.EC2_USERNAME}}@$EC2_PUBLIC_IP docker run --env-file .admin.env -d -p 3001:3001 --name a1-container ${{ secrets.DOCKER_USERNAME }}/administrative-api:latest
+              run: ssh -o StrictHostKeyChecking=no -i private_key ${{secrets.EC2_USERNAME}}@${{env.EC2_PUBLIC_IP}} docker run --env-file .admin.env -d -p 3001:3001 --name a1-container ${{ secrets.DOCKER_USERNAME }}/administrative-api:latest
