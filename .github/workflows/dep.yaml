@@ -1,135 +1,23 @@
-name: Administrative API Build, Publish, and Deploy
+# 
 
-on:
-    push:
-        branches: ["main"]
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout Source
-              uses: actions/checkout@v3
-
-            - name: Check secret
-              run: echo ${{ secrets.DOCKER_USERNAME }} | sed 's/./& /g'
-
-            - name: Authenticate (Docker Hub)
-              run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_TOKEN }}
-
-
-            - name: Build Image
-              run: |
-                docker build -t my-nest-app:latest .
-
-            - name: Publish Image
-              run: |
-                docker tag my-nest-app:latest ${{ secrets.DOCKER_USERNAME }}/my-nest-app:latest 
-                docker push ${{ secrets.DOCKER_USERNAME }}/my-nest-app:latest
-
-    pulumi-up:
-        runs-on: ubuntu-latest
-        needs: build
-        # if: github.event_name == 'push' && (contains(github.event.head_commit.message, '[infra]') || github.event.commits[0].modified[0] == 'pulumi/**')
-        outputs:
-          SSH_PRIVATE_KEY: ${{ steps.pulumi_output.outputs.SSH_PRIVATE_KEY }}
-          EC2_PUBLIC_IP: ${{ steps.pulumi_output.outputs.EC2_PUBLIC_IP }}
-        steps:
-            - name: Configure AWS Credentials
-              uses: aws-actions/configure-aws-credentials@v1
-              with:
-                aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-                aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-                aws-region: us-east-1
-
-              
-            - name: Checkout Source
-              uses: actions/checkout@v3
-
-            - name: Change to project directory
-              run: cd pulumi
-            
-            - run: |
-                  cd pulumi && npm install
-            - name: Set up Pulumi
-              uses: pulumi/actions@v3
-              with:
-                command: up
-                stack-name: sebastianthomas94/sample-test/dev
-                work-dir: pulumi
-              env:
-                PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
-
-
-            # - name: Pulumi up
-            #   run: |
-            #     pulumi stack select dev
-            #     pulumi up --stack 'sebastianthomas94/sample-test/dev' --yes
-
-            - name: Capture EC2 Outputs
-              id: pulumi_output
-              run: |
-                pwd
-                cd pulumi
-                pwd
-                pulumi stack select dev
-                pulumi stack output publicIp
-                pulumi stack output privateKey
-                echo "EC2_PUBLIC_IP=$(pulumi stack output publicIp)" >> $GITHUB_ENV
-                echo "SSH_PRIVATE_KEY=$(pulumi stack output privateKey)" >> $GITHUB_ENV
-                echo "SSH_PRIVATE_KEY="${{ env.SSH_PRIVATE_KEY }}
-                echo "EC2_PUBLIC_IP="${{ env.EC2_PUBLIC_IP }}
-                cat $GITHUB_ENV
-              env:
-                EC2_PUBLIC_IP: $(pulumi stack output publicIp)
-                SSH_PRIVATE_KEY: $(pulumi stack output privateKey)
-
-            - name: Use Captured Environment Variables
-              run: |
-                echo "SSH_PRIVATE_KEY=${{ env.SSH_PRIVATE_KEY }}"
-                echo "SSH_PRIVATE_KEY=${{ env.SSH_PRIVATE_KEY }}" >> $GITHUB_OUTPUT
-                echo "EC2_PUBLIC_IP=${{ env.EC2_PUBLIC_IP }}" >> $GITHUB_OUTPUT
-                cat $GITHUB_OUTPUT
-            
-            - name: check if output and env set
-              run: |
-                cat #GITHUB_ENV
-
-    deploy:
-        runs-on: ubuntu-latest
-        needs: [build, pulumi-up]
-        steps:
-            - name: Checkout Source
-              uses: actions/checkout@v3
-            - env:
-                EC2_PUBLIC_IP: ${{ needs.pulumi-up.env.EC2_PUBLIC_IP }}
-                SSH_PRIVATE_KEY: ${{ needs.pulumi-up.env.SSH_PRIVATE_KEY }}
-              run: echo "this is the  env=$EC2_PUBLIC_IP $SSH_PRIVATE_KEY"
-
-            - name: Deploy
-              run: |
-                  cat $GITHUB_ENV
-                  echo "env=${{ needs.pulumi-up.env.EC2_PUBLIC_IP }}"
-                  echo "ec2 publicip using jobs=${{ needs.pulumi-up.outputs.EC2_PUBLIC_IP }}"
-                  echo "EC2_PUBLIC_IP=${{ needs.pulumi-up.outputs.EC2_PUBLIC_IP }}"
-                  echo "${{ env.SSH_PRIVATE_KEY }}" > private_key && chmod 600 private_key
-                  cat private_key
-                  ssh -o StrictHostKeyChecking=no -i private_key ${{secrets.EC2_USERNAME}}@${{needs.pulumi-up.outputs.EC2_PUBLIC_IP}}
-
-            - name: Pull Image
-              run: |
-                   set -e
-                   ssh -o StrictHostKeyChecking=no -i private_key ${{secrets.EC2_USERNAME}}@${{env.EC2_PUBLIC_IP}} docker pull ${{ secrets.DOCKER_USERNAME }}/administrative-api:latest || exit 1   
-
-            - name: Stop running container
-              run: ssh -o StrictHostKeyChecking=no -i private_key ${{secrets.EC2_USERNAME}}@${{env.EC2_PUBLIC_IP}} docker stop a1-container || true
-
-            - name: Remove container
-              run: ssh -o StrictHostKeyChecking=no -i private_key ${{secrets.EC2_USERNAME}}@${{env.EC2_PUBLIC_IP}} docker rm a1-container || true
-
-            - name: Remove existing image
-              run: |
-                ssh -o StrictHostKeyChecking=no -i private_key ${{secrets.EC2_USERNAME}}@${{env.EC2_PUBLIC_IP}} docker rmi $(ssh -o StrictHostKeyChecking=no -i private_key ${{secrets.EC2_USERNAME}}@${{secrets.EC2_PUBLIC_IP}} docker images -q --filter "dangling=true") || true
-
-            - name: Run new container
-              run: ssh -o StrictHostKeyChecking=no -i private_key ${{secrets.EC2_USERNAME}}@${{env.EC2_PUBLIC_IP}} docker run --env-file .admin.env -d -p 3001:3001 --name a1-container ${{ secrets.DOCKER_USERNAME }}/administrative-api:latest
+  job1:
+    runs-on: ubuntu-latest
+    # Map a step output to a job output
+    outputs:
+      output1: ${{ steps.step1.outputs.test }}
+      output2: ${{ steps.step2.outputs.test }}
+    steps:
+      - id: step1
+        run: echo "test=hello" >> "$GITHUB_OUTPUT"
+      - id: step2
+        run: echo "test=world" >> "$GITHUB_OUTPUT"
+  job2:
+    runs-on: ubuntu-latest
+    needs: job1
+    steps:
+      - env:
+          OUTPUT1: ${{needs.job1.outputs.output1}}
+          OUTPUT2: ${{needs.job1.outputs.output2}}
+        run: echo "$OUTPUT1 $OUTPUT2"
