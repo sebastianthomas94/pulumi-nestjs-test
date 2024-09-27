@@ -31,6 +31,9 @@ jobs:
         runs-on: ubuntu-latest
         needs: build
         # if: github.event_name == 'push' && (contains(github.event.head_commit.message, '[infra]') || github.event.commits[0].modified[0] == 'pulumi/**')
+        outputs:
+          SSH_PRIVATE_KEY: ${{ steps.pulumi_output.outputs.SSH_PRIVATE_KEY }}
+          EC2_PUBLIC_IP: ${{ steps.pulumi_output.outputs.EC2_PUBLIC_IP }}
         steps:
             - name: Configure AWS Credentials
               uses: aws-actions/configure-aws-credentials@v1
@@ -99,7 +102,7 @@ jobs:
               run: |
                   cat $GITHUB_ENV
                   echo "${{ env.EC2_PUBLIC_IP }}"
-                  echo "ec2 publicip using jobs=${{ jobs.pulumi-up.env.EC2_PUBLIC_IP }}"
+                  echo "ec2 publicip using jobs=${{ jobs.pulumi-up.outputs.EC2_PUBLIC_IP }}"
                   echo "EC2_PUBLIC_IP=${{ needs.pulumi-up.outputs.EC2_PUBLIC_IP }}"
                   echo "EC2_PUBLIC_IP jobs=${{ jobs.pulumi-up.outputs.EC2_PUBLIC_IP }}"
                   echo "${{ env.SSH_PRIVATE_KEY }}" > private_key && chmod 600 private_key
