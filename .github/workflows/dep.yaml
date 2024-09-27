@@ -77,6 +77,8 @@ jobs:
                 echo "SSH_PRIVATE_KEY="${{ env.SSH_PRIVATE_KEY }}
                 echo "EC2_PUBLIC_IP="${{ env.EC2_PUBLIC_IP }}
                 cat $GITHUB_ENV
+              env:
+                EC2_PUBLIC_IP: $(pulumi stack output publicIp)
 
     deploy:
         runs-on: ubuntu-latest
