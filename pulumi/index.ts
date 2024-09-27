@@ -17,7 +17,7 @@ const securityGroup = new aws.ec2.SecurityGroup("securityGroup", {
 const instance = new aws.ec2.Instance("instance", {
     instanceType: "t2.micro",
     ami: "ami-0e86e20dae9224db8",
-    keyName: "new-pulumi", // real key pair
+    keyName: "new-pair-pulumi-for-created", // real key pair
     securityGroups: [securityGroup.name],
     userData: `#!/bin/bash
     apt-get update -y
@@ -44,7 +44,6 @@ const sshKey = new tls.PrivateKey("ssh-key", {
 
 // Export the public key to associate with EC2
  export const privateKey = sshKey.privateKeyOpenssh;
-
 
 // Export the public IP of the instance
 export const publicDns = instance.publicDns;
