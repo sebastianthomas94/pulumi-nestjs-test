@@ -100,7 +100,7 @@ jobs:
             - env:
                 EC2_PUBLIC_IP: ${{ needs.pulumi-up.outputs.EC2_PUBLIC_IP }}
                 SSH_PRIVATE_KEY: ${{ needs.pulumi-up.outputs.SSH_PRIVATE_KEY }}
-              run: echo "$EC2_PUBLIC_IP $SSH_PRIVATE_KEY"
+              run: echo "this is the  env=$EC2_PUBLIC_IP $SSH_PRIVATE_KEY"
 
             - name: Deploy
               run: |
