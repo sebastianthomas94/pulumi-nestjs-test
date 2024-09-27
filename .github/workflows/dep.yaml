@@ -130,7 +130,7 @@ jobs:
 
             - name: Remove existing image
               run: |
-                ssh -o StrictHostKeyChecking=no -i private_key ${{secrets.EC2_USERNAME}}@$EC2_PUBLIC_IP docker rmi $(ssh -o StrictHostKeyChecking=no -i private_key ${{secrets.EC2_USERNAME}}@${{secrets.EC2_PUBLIC_IP}} docker images -q --filter "dangling=true") || true
+                ssh -o StrictHostKeyChecking=no -i private_key ${{secrets.EC2_USERNAME}}@$EC2_PUBLIC_IP docker rmi $(ssh -o StrictHostKeyChecking=no -i private_key ${{secrets.EC2_USERNAME}}@$EC2_PUBLIC_IP docker images -q --filter "dangling=true") || true
 
             - name: Run new container
               run: ssh -o StrictHostKeyChecking=no -i private_key ${{secrets.EC2_USERNAME}}@$EC2_PUBLIC_IP docker run --env-file .admin.env -d -p 3001:3001 --name a1-container ${{ secrets.DOCKER_USERNAME }}/administrative-api:latest
