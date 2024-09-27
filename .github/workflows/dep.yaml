@@ -69,10 +69,14 @@ jobs:
                 pwd
                 cd pulumi
                 pwd
+                pulumi stack select dev
+                pulumi stack output publicIp
+                pulumi stack output privateKey
                 echo "EC2_PUBLIC_IP=$(pulumi stack output publicIp)" >> $GITHUB_ENV
                 echo "SSH_PRIVATE_KEY=$(pulumi stack output privateKey)" >> $GITHUB_ENV
-                echo "${{ env.EC2_PUBLIC_IP }}"
-                echo "${{ env.SSH_PRIVATE_KEY }}"
+                echo "SSH_PRIVATE_KEY=${{ env.SSH_PRIVATE_KEY }}"
+                echo "EC2_PUBLIC_IP=${{ env.EC2_PUBLIC_IP }}"
+                cat $GITHUB_ENV
 
     deploy:
         runs-on: ubuntu-latest
