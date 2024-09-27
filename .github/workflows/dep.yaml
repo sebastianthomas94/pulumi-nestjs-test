@@ -67,6 +67,8 @@ jobs:
               id: pulumi_output
               run: |
                 pwd
+                cd pulumi
+                pwd
                 echo "EC2_PUBLIC_IP=$(pulumi stack output publicIp)" >> $GITHUB_ENV
                 echo "SSH_PRIVATE_KEY=$(pulumi stack output privateKey)" >> $GITHUB_ENV
                 echo "${{ env.EC2_PUBLIC_IP }}"
