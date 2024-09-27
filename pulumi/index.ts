@@ -43,7 +43,7 @@ const sshKey = new tls.PrivateKey("ssh-key", {
 });
 
 // Export the public key to associate with EC2
- export const publicKey = sshKey.publicKeyOpenssh;
+ export const privateKey = sshKey.privateKeyPem;
 
 
 // Export the public IP of the instance
